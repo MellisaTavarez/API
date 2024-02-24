@@ -1,0 +1,25 @@
+from flask import Flask
+from flask_restful import Resource, Api, reqparse
+from flask_httpauth import HTTPBasicAuth
+
+app = Flask(__name__)
+api = Api(app)
+auth = HTTPBasicAuth()
+
+users = {
+    'username': 'password'
+}
+
+@auth.verify_password
+def verify_password(username, password):
+    return users.get(username) == password
+
+class PrivateResource(Resource):
+    @auth.login_required
+    def get(self):
+        return {'message': 'This is a private resource'}
+
+api.add_resource(PrivateResource, '/private')
+
+if __name__ == '__main__':
+    app.run(debug=True)
